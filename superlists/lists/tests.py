@@ -1,4 +1,4 @@
-from django.core.urlresolvers import resolve
+from django.core.urlresolvers import resolve, reverse
 from django.test import TestCase
 from django.http import HttpRequest
 from lists.views import home_page
@@ -18,11 +18,6 @@ class HomePageTest(TestCase):
         expected_html = render_to_string('home.html')
 
         self.assertEqual(response.content.decode(), expected_html)
-
-    def test_home_page_only_saves_items_when_necessary(self):
-        request = HttpRequest()
-        home_page(request)
-        self.assertEqual(Item.objects.count(), 0)
 
 class ItemModelTest(TestCase):
 
@@ -60,7 +55,7 @@ class ListViewTest(TestCase):
 class NewListTest(TestCase):
     def test_saveing_a_POST_request(self):
         self.client.post(
-            'lists/new',
+            '/lists/new',
             data={'item_text': 'A new list item'}
         )
 
@@ -70,8 +65,8 @@ class NewListTest(TestCase):
 
     def test_redirects_agter_POST(self):
         response = self.client.post(
-            'lists/new',
+            reverse('new_list'),
             data={'item_text': 'A new list item'}
         )
         self.assertEqual(response.status_code, 302)
-        self.assertRedirects(response['location'], '/lists/the-only-list-in-the-world/')
+        self.assertRedirects(response, '/lists/the-only-list-in-the-world/')
